@@ -139,7 +139,7 @@ module Lita
         return if $release_list.nil?
         if $release_list.key?(author)
           $release_list.delete(author)
-          response.reply "Has been approved. Thanks, #{user.name}"
+          response.reply "Has been approved. Thanks, #{response.user.mention_name}"
         else
           response.reply "Unexpected commiter '#{author}'"
         end
