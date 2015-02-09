@@ -183,7 +183,6 @@ module Lita
         lines << "@list:          Show release list:"
         lines << "@status:        Show release status"
         lines << "@help:          Show this help"
-        lines << "about git daily https://github.com/koichiro/git-daily"
         response.reply indent_lines(lines)
       end
 
