@@ -54,7 +54,7 @@ module Lita
           response.reply "[#{author}]"
           list.each do |hash|
             count += 1
-            response.reply $githab + hash
+            response.reply config.github + hash
           end
         end
         response.reply 'Check list is clean.' unless count > 0
