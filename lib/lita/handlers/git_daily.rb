@@ -51,86 +51,100 @@ module Lita
       def output_release_list(response)
         count = 0
         get_release_list.each do |author,list|
-          response.reply "[#{author}]"
+          lines = []
+          lines << "[#{author}]"
           list.each do |hash|
             count += 1
-            response.reply config.github + hash
+            lines << config.github + hash
           end
+          response.reply indent_lines(lines)
         end
-        response.reply 'Check list is clean.' unless count > 0
+        response.reply '> Check list is clean.' unless count > 0
       end
 
       def release_open(response)
-        response.reply 'Release process is already open!' and return if get_status == 'open'
-        response.reply 'Hotfix process is already open!'  and return if get_status == 'hotfix-open'
+        response.reply '> Release process is already open!' and return if get_status == 'open'
+        response.reply '> Hotfix process is already open!'  and return if get_status == 'hotfix-open'
         status, stdout, stderr = systemu 'git daily release open', :stdin => 'yes'
         if stderr
+          err_lines = []
           stderr.split(/\n/).each do |row|
-            response.reply row if row =~ /fatal/
-            response.reply row if row =~ /error/i
+            err_lines << row if row =~ /fatal/
+            err_lines << row if row =~ /error/i
           end
+          response.reply indent_lines(err_lines)
         end
 
+        lines = []
         stdout.split(/\n/).each do |row|
           next if row =~ /Confirm/
           next if row =~ /yN/
-          response.reply row
+          lines << row
         end
+        response.reply indent_lines(lines)
 
         output_release_list(response)
       end
 
       def release_close(response)
         return unless get_status == 'open'
-        return response.reply 'Not finished test yet!' unless get_release_list.empty?
+        return response.reply '> Not finished test yet!' unless get_release_list.empty?
         output = false
+        lines = []
         git_exec('daily release close').each do |row|
           output = true if row == 'push master to origin'
-          response.reply row if output
+          lines << row if output
         end
-        response.reply 'Please deploy master branch to production servers.'
+        lines << 'Please deploy master branch to production servers.'
+        response.reply indent_lines(lines)
         $release_list = nil
       end
 
       def hotfix_open(response)
-        return response.reply 'Release process is already open!' if get_status == 'open'
-        return response.reply 'Hotfix process is already open!'  if get_status == 'hotfix-open'
+        return response.reply '> Release process is already open!' if get_status == 'open'
+        return response.reply '> Hotfix process is already open!'  if get_status == 'hotfix-open'
         # for hotfix
+        lines = []
         git_exec('checkout master').each do |row|
-          response.reply row
+          lines << row
         end
 
         status, stdout, stderr = systemu 'git daily hotfix open', :stdin => 'yes'
         if stderr
+          err_lines = []
           stderr.split(/\n/).each do |row|
-            response.reply row if row =~ /fatal/
-            response.reply row if row =~ /error/i
+            err_lines << row if row =~ /fatal/
+            err_lines << row if row =~ /error/i
           end
+          response.reply indent_lines(err_lines)
         end
 
         stdout.split(/\n/).each do |row|
           next if row =~ /Confirm/
           next if row =~ /yN/
-          response.reply row
+          lines << row
         end
+        response.reply indent_lines(lines)
       end
 
       def hotfix_close(response)
         return unless get_status == 'hotfix-open'
-        return response.reply 'Not finished test yet!' unless get_release_list.empty?
+        return response.reply '> Not finished test yet!' unless get_release_list.empty?
         output = false
+        lines = []
         git_exec('daily hotfix close').each do |row|
           output = true  if row =~ /push/
           output = false if row =~ /Merge made/
-          response.reply row if output
+          lines << row if output
         end
 
         # for hotfix
         git_exec('checkout develop').each do |row|
-          response.reply row
+          lines << row
         end
 
-        response.reply 'Please deploy master branch to production servers.'
+        lines << 'Please deploy master branch to production servers.'
+        response.reply indent_lines(lines)
         $release_list = nil
       end
 
@@ -139,36 +153,44 @@ module Lita
         return if $release_list.nil?
         if $release_list.key?(author)
           $release_list.delete(author)
-          response.reply "Has been approved. Thanks, #{response.user.mention_name}"
+          response.reply "> Has been approved. Thanks, #{response.user.mention_name}"
         else
-          response.reply "Unexpected commiter '#{author}'"
+          response.reply "> Unexpected commiter '#{author}'"
         end
       end
 
       def sync(response)
         status = get_status
-        return response.reply 'Release process is not running!' if status == 'close'
+        return response.reply '> Release process is not running!' if status == 'close'
         cmd = status == 'open' ? 'daily release sync' : 'daily hotfix sync'
         git_exec(cmd).each do |row|
           response.reply row
         end
         $release_list = nil
-        output_release_list(m)
+        output_release_list(response)
       end
 
       def status(response)
-        response.reply "Release process is '#{get_status}'"
+        response.reply "> Release process is '#{get_status}'"
       end
 
       def help(response)
-        response.reply "@release-open:  git-daily open"
-        response.reply "@release-close: git-daily close"
-        response.reply "@hotfix-open:   git daily hotfix open"
-        response.reply "@hotfix-close:  git daily hotfix close"
-        response.reply "@list:          Show release list:"
-        response.reply "@status:        Show release status"
-        response.reply "@help:          Show this help"
-        response.reply "about git daily https://github.com/koichiro/git-daily"
+        lines = []
+        lines << "@release-open:  git-daily open"
+        lines << "@release-close: git-daily close"
+        lines << "@hotfix-open:   git daily hotfix open"
+        lines << "@hotfix-close:  git daily hotfix close"
+        lines << "@list:          Show release list:"
+        lines << "@status:        Show release status"
+        lines << "@help:          Show this help"
+        lines << "about git daily https://github.com/koichiro/git-daily"
+        response.reply indent_lines(lines)
+      end
+
+      private
+
+      def indent_lines(lines)
+        ">>>" + lines.join("\n")
       end
 
     end
