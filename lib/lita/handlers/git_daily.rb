@@ -1,3 +1,5 @@
+require 'systemu'
+
 module Lita
   module Handlers
     class GitDaily < Handler
