@@ -18,6 +18,7 @@ module Lita
       route(/^@help/,          :help                )
 
       def git_exec(arg)
+        Dir::chdir(config.repos)
         `yes | git #{arg}`.split("\n")
       end
 
