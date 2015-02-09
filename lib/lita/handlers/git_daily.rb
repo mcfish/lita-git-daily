@@ -135,7 +135,7 @@ module Lita
       end
 
       def user_confirm(response)
-        author = response.matches.first
+        author = response.matches.first.first
         return if $release_list.nil?
         if $release_list.key?(author)
           $release_list.delete(author)
