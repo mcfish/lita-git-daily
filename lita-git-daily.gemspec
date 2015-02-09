@@ -14,6 +14,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
+  spec.add_dependency "git-daily", ">= 0.0.1"
   spec.add_dependency "systemu", "~> 2.6.4"
 
   spec.add_runtime_dependency "lita", ">= 4.2"
