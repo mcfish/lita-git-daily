@@ -57,7 +57,7 @@ module Lita
             count += 1
             lines << config.github + hash
           end
-          response.reply indent_lines(lines)
+          reply_indent_lines(response, lines)
         end
         response.reply '> Check list is clean.' unless count > 0
       end
@@ -72,7 +72,7 @@ module Lita
             err_lines << row if row =~ /fatal/
             err_lines << row if row =~ /error/i
           end
-          response.reply indent_lines(err_lines)
+          reply_indent_lines(response, err_lines)
         end
 
         lines = []
@@ -81,7 +81,7 @@ module Lita
           next if row =~ /yN/
           lines << row
         end
-        response.reply indent_lines(lines)
+        reply_indent_lines(response, lines)
 
         output_release_list(response)
       end
@@ -96,7 +96,7 @@ module Lita
           lines << row if output
         end
         lines << 'Please deploy master branch to production servers.'
-        response.reply indent_lines(lines)
+        reply_indent_lines(response, lines)
         $release_list = nil
       end
 
@@ -116,7 +116,7 @@ module Lita
             err_lines << row if row =~ /fatal/
             err_lines << row if row =~ /error/i
           end
-          response.reply indent_lines(err_lines)
+          reply_indent_lines(response, err_lines)
         end
 
         stdout.split(/\n/).each do |row|
@@ -124,7 +124,7 @@ module Lita
           next if row =~ /yN/
           lines << row
         end
-        response.reply indent_lines(lines)
+        reply_indent_lines(response, lines)
       end
 
       def hotfix_close(response)
@@ -144,7 +144,7 @@ module Lita
         end
 
         lines << 'Please deploy master branch to production servers.'
-        response.reply indent_lines(lines)
+        reply_indent_lines(response, lines)
         $release_list = nil
       end
 
@@ -163,9 +163,11 @@ module Lita
         status = get_status
         return response.reply '> Release process is not running!' if status == 'close'
         cmd = status == 'open' ? 'daily release sync' : 'daily hotfix sync'
+        lines = []
         git_exec(cmd).each do |row|
-          response.reply row
+          lines << row
         end
+        reply_indent_lines(response, lines)
         $release_list = nil
         output_release_list(response)
       end
@@ -183,13 +185,14 @@ module Lita
         lines << "@list:          Show release list:"
         lines << "@status:        Show release status"
         lines << "@help:          Show this help"
-        response.reply indent_lines(lines)
+        reply_indent_lines(response, lines)
       end
 
       private
 
-      def indent_lines(lines)
-        ">>>" + lines.join("\n")
+      def reply_indent_lines(response, lines)
+        return if lines.size == 0
+        response.reply(">>>" + lines.join("\n"))
       end
 
     end
