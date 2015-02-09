@@ -3,7 +3,7 @@ module Lita
     class GitDaily < Handler
 
       config :repos, type: String
-      config :githab, type: String
+      config :github, type: String
 
       $release_list = nil
 
