@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-git-daily"
-  spec.version       = "0.0.1"
+  spec.version       = "0.1.0"
   spec.authors       = ["ata.1213"]
   spec.email         = ["ata.1213@gmail.com"]
   spec.description   = %q{A Lita handler for git-daily}

@@ -12,7 +12,16 @@ gem "lita-git-daily"
 
 ## Configuration
 
-TODO: Describe any configuration attributes the plugin exposes.
+``` ruby
+Lita.configure do |config|
+  config.handlers.git_daily.channel_config = {
+    "CHANNNELID" => {
+      :repos  => "/path/to/repository/",
+      :github => "https://github.com/path/to/commit/",
+    },
+  }
+end
+```
 
 ## Usage
 
