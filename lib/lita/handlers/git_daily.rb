@@ -94,7 +94,7 @@ module Lita
       def release_close(response)
         repos = $git_config[response.message.source.room][:repos]
         return unless get_status(repos) == 'open'
-        return response.reply '> Not finished test yet!' unless get_release_list.empty?
+        return response.reply '> Not finished test yet!' unless get_release_list(response).empty?
         output = false
         lines = []
         git_exec('daily release close', repos).each do |row|
@@ -138,7 +138,7 @@ module Lita
       def hotfix_close(response)
         repos = $git_config[response.message.source.room][:repos]
         return unless get_status(repos) == 'hotfix-open'
-        return response.reply '> Not finished test yet!' unless get_release_list.empty?
+        return response.reply '> Not finished test yet!' unless get_release_list(response).empty?
         output = false
         lines = []
         git_exec('daily hotfix close', repos).each do |row|
